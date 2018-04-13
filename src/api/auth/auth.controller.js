@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const Account = require('models/Account');
+const Account = require('models/account');
 
 exports.localRegister = async (ctx) => {
   const schema = Joi.object().keys({
@@ -32,11 +32,19 @@ exports.localRegister = async (ctx) => {
   let account = null;
   try {
     account = await Account.localRegister(ctx.request.body);
-  } catch(e) {
+  } catch (e) {
     ctx.throw(500, e);
   }
 
-  ctx.body = account.profile;
+  let token = null;
+  try {
+    token = await account.generateToken();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+
+  ctx.cookies.set('access_token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 });
+  ctx.body = account.profile; // 프로필 정보로 응답합니다.
 };
 
 exports.localLogin = async (ctx) => {
