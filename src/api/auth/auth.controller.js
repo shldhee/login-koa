@@ -43,6 +43,7 @@ exports.localRegister = async (ctx) => {
     ctx.throw(500, e);
   }
 
+
   ctx.cookies.set('access_token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 });
   ctx.body = account.profile; // 프로필 정보로 응답합니다.
 };
@@ -73,6 +74,14 @@ exports.localLogin = async (ctx) => {
     return;
   }
 
+  let token = null;
+  try {
+    token = await account.generateToken();
+  } catch (e) {
+    ctx.throw(500, e);
+  }
+
+  ctx.cookies.set('access_token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 });
 
   ctx.body = account.profile;
 };
@@ -92,6 +101,21 @@ exports.exists = async (ctx) => {
   };
 };
 
-exports.logout = async (ctx) => {
-  ctx.body = 'logout';
+exports.logout = (ctx) => {
+  ctx.cookies.set('access_token', null, {
+    maxAge: 0,
+    httpOnly: true
+  });
+  ctx.status = 204;
+};
+
+exports.check = (ctx) => {
+  const { user } = ctx.request;
+
+  if(!user) {
+    ctx.status = 403; // Forbidden
+    return;
+  }
+
+  ctx.body = user.profile;
 };

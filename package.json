@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "cookies": "^0.7.1",
     "cross-env": "^5.1.4",
     "dotenv": "^5.0.1",
     "joi": "^13.1.2",
